@@ -45,6 +45,8 @@
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script>
   $(document).ready(function(){
+    let userId = '';
+
     $(document).on("click", ".quizId", function(){
       let id = $(this).data("sesi");
 
@@ -121,11 +123,15 @@
           data: {
             username: username, password: password
           },
-          success: function(){
-            alert("Berhasil login. Mohon tunggu...")
+          success: function(res){
+            alert(res.msg);
+
+            // Initialize
+            userId = localStorage.setItem('userId', res.username);
+
             setTimeout(function(){
               window.location.href = "home";
-            }, 2000);
+            }, 1000);
           },
           error: function(xhr){
             let response = JSON.parse(xhr.responseText);
@@ -136,55 +142,88 @@
       }
     });
 
+    // Edit Form
+    // Using
+    userId = localStorage.getItem('userId');
+
+    $.ajax({
+      type: "GET",
+      url: "http://localhost:8000/getName",
+      dataType: "json",
+      data: {
+        username: userId
+      },
+      success: function(res){
+        $("#getName").text(res.nama_lengkap);
+        $("#getNameForm").val(res.nama_lengkap);
+        $("#getUsernameForm").val(userId);
+      }
+    });
+
+    // Update Profile
+    $(document).on("click","#btnUpdateProfile", function(){
+      let getNameForm = $("#getNameForm").val();
+      let getUsernameForm = $("#getUsernameForm").val();
+      $.ajax({
+        type: "POST",
+        url: "http://localhost:8000/update-profile",
+        data: {
+          userId: localStorage.getItem('userId'),
+          nama_lengkap: getNameForm,
+          username: getUsernameForm,
+        },
+        success: function(res){
+          alert(res.msg);
+          localStorage.setItem('userId', getUsernameForm);
+          window.location.reload();
+        }
+      })
+    });
+
     // Update Password
     $(document).on("click","#btnUpdatePassword", function(){
-      let old_password = $("#old_password").val();
-      let new_password = $("#new_password").val();
+      let oldPasswordForm = $("#oldPasswordForm").val();
+      let newPasswordForm = $("#newPasswordForm").val();
 
-      if(old_password == ''){
+      if(oldPasswordForm == ''){
         alert("Password lama harus diisi!")
       }
 
-      if(new_password == ''){
+      if(newPasswordForm == ''){
         alert("Password baru harus diisi!")
       }
 
-      if(old_password != '' && new_password != ''){
+      if(oldPasswordForm != '' && newPasswordForm != ''){
         $.ajax({
           type: "POST",
           url: "http://localhost:8000/update-password",
           data: {
-            old_password: old_password, new_password: new_password
+            userId: localStorage.getItem('userId'),
+            old_password: oldPasswordForm, 
+            new_password: newPasswordForm
           },
-          success: function(){
-            alert("Berhasil memperbarui password!");
+          success: function(res){
+            alert(res.msg);
+            window.location.reload();
           },
           error: function(xhr){
-            // let response = JSON.parse(xhr.responseText);
-            // let errorMessage = response.msg;
-            // alert(errorMessage);
-            alert(xhr.responseText);
+            let response = JSON.parse(xhr.responseText);
+            let errorMessage = response.msg;
+            alert(errorMessage);
           }
         });
       }
     });
 
-    // getUser Update
-    $.ajax({
-      type: "GET",
-      url: "http://localhost:8000/getUser",
-      dataType: "json",
-      success: function(res){
-        $("#getNamaLengkap").val(res.nama_lengkap);
-      }
-    })
     // Logout
     $(document).on("click","#btnLogout", function(){
       $.ajax({
         type: "POST",
         url: "http://localhost:8000/logout",
-        success: function(){
-          if(confirm("Yakin ingin logout?")){
+        success: function(res){
+          userId = localStorage.clear();
+
+          if(confirm(res.msg)){
             window.location.href = "login";
           }
         },

@@ -10,23 +10,14 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    public function getUser()
+    public function getName(Request $req)
     {
-        if (Auth::check()) {
-            $nama_lengkap = Auth::user()->nama_lengkap;
-            
-            return response()->json([
-                'nama_lengkap' => $nama_lengkap
-            ]);
-        } else {
-            return response()->json([
-                'error' => 'Tidak ada pengguna yang diotentikasi'
-            ], 401); // Atau kode status yang sesuai
-        }
+        $user = User::where('username', $req->username)->first();
         
-        // return response()->json([
-        //     'nama_lengkap' => $nama_lengkap
-        // ])->header('Access-Control-Allow-Origin', 'http://localhost:8100');
+        return response()->json([
+            'nama_lengkap' => $user->nama_lengkap,
+            'username' => $user->username,
+        ]); 
     }
 
     public function register(Request $req)
@@ -58,8 +49,10 @@ class AuthController extends Controller
         $password = $req->password;
 
         if(Auth::attempt(['username' => $username, 'password' => $password])){
-            return response()->json(['msg' => 'Berhasil Login!'])
-            ->header('Access-Control-Allow-Origin', 'http://localhost:8100');
+            return response()->json([
+                'msg' => 'Berhasil Login!',
+                'username' => $username
+            ])->header('Access-Control-Allow-Origin', 'http://localhost:8100');
         }else{
             return response()->json(['msg' => 'Gagal Login!'], 400)
             ->header('Access-Control-Allow-Origin', 'http://localhost:8100');
@@ -73,16 +66,13 @@ class AuthController extends Controller
             'new_password' => 'required|min:8',
         ]);
 
-        if (!Auth::check()) {
-            return response()->json(['msg' => 'Pengguna belum login.'], 400)
-                ->header('Access-Control-Allow-Origin', 'http://localhost:8100');
-        }
+        $current_password = User::where('username', $req->userId)->first();
 
         $old_password = $req->old_password;
         $new_password = $req->new_password;
 
-        if (Hash::check(Auth::user()->password, $old_password)) {
-            User::where('id', Auth::user()->id)
+        if (Hash::check($old_password, $current_password->password)) {
+            User::where('username', $req->userId)
                     ->update([
                         'password' => Hash::make($new_password)
                     ]);
@@ -96,16 +86,27 @@ class AuthController extends Controller
         
     }
 
+    public function update_profile(Request $req)
+    {
+        $this->validate($req, [
+            'nama_lengkap' => 'required',
+            'username' => 'required',
+        ]);
+
+        User::where('username', $req->userId)
+                ->update([
+                    'nama_lengkap' => $req->nama_lengkap,
+                    'username' => $req->username
+                ]);
+
+        return response()->json(['msg' => 'Berhasil memperbarui profile!']);
+    }
+
     public function logout(Request $req)
     {
-        $logout = Auth::logout();
+        Auth::logout();
 
-        if($logout){
-            return response()->json(['msg' => 'Berhasil Logout!'])
+        return response()->json(['msg' => 'Yakin ingin logout?'])
             ->header('Access-Control-Allow-Origin', 'http://localhost:8100');
-        }else{
-            return response()->json(['msg' => 'Gagal Logout!'])
-            ->header('Access-Control-Allow-Origin', 'http://localhost:8100');
-        }
     }
 }
