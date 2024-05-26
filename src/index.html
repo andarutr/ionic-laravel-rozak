@@ -62,6 +62,54 @@
     $(document).on("click", "#btnProfile", function(){
       window.location.href = "user/profile"
     });
+
+    // Register
+    $(document).on("click", "#btnRegister", function(){
+      let nama_lengkap = $("#nama_lengkap").val();
+      let username = $("#username").val();
+      let password = $("#password").val();
+
+      $.ajax({
+        type: "POST",
+        url: "http://localhost:8000/register",
+        data: {
+          nama_lengkap: nama_lengkap,
+          username: username,
+          password: password
+        },
+        success: function(){
+          if (confirm("Registrasi berhasil. Lanjutkan ke halaman login?")) {
+            window.location.href = "login";
+          }
+        },
+        error: function(xhr){
+          alert(xhr.responseText);
+        }
+      })
+    });
+
+    // Login
+    $(document).on("click", "#btnLogin", function(){
+      let username = $("#username").val();
+      let password = $("#password").val();
+
+      $.ajax({
+        type: "POST",
+        url: "http://localhost:8000/login",
+        data: {
+          username: username, password: password
+        },
+        success: function(){
+          alert("Berhasil login. Mohon tunggu...")
+          setTimeout(function(){
+            window.location.href = "home";
+          }, 2000);
+        },
+        error: function(xhr){
+          alert(xhr.responseText);
+        }
+      })
+    });
   });
   </script>
 </body>
