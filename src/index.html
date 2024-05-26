@@ -117,6 +117,7 @@
         $.ajax({
           type: "POST",
           url: "http://localhost:8000/login",
+          dataType: "json",
           data: {
             username: username, password: password
           },
@@ -133,6 +134,66 @@
           }
         })
       }
+    });
+
+    // Update Password
+    $(document).on("click","#btnUpdatePassword", function(){
+      let old_password = $("#old_password").val();
+      let new_password = $("#new_password").val();
+
+      if(old_password == ''){
+        alert("Password lama harus diisi!")
+      }
+
+      if(new_password == ''){
+        alert("Password baru harus diisi!")
+      }
+
+      if(old_password != '' && new_password != ''){
+        $.ajax({
+          type: "POST",
+          url: "http://localhost:8000/update-password",
+          data: {
+            old_password: old_password, new_password: new_password
+          },
+          success: function(){
+            alert("Berhasil memperbarui password!");
+          },
+          error: function(xhr){
+            // let response = JSON.parse(xhr.responseText);
+            // let errorMessage = response.msg;
+            // alert(errorMessage);
+            alert(xhr.responseText);
+          }
+        });
+      }
+    });
+
+    // getUser Update
+    $.ajax({
+      type: "GET",
+      url: "http://localhost:8000/getUser",
+      dataType: "json",
+      success: function(res){
+        $("#getNamaLengkap").val(res.nama_lengkap);
+      }
+    })
+    // Logout
+    $(document).on("click","#btnLogout", function(){
+      $.ajax({
+        type: "POST",
+        url: "http://localhost:8000/logout",
+        success: function(){
+          if(confirm("Yakin ingin logout?")){
+            window.location.href = "login";
+          }
+        },
+        error: function(xhr){
+          let response = JSON.parse(xhr.responseText);
+          let errorMessage = response.msg;
+          alert(errorMessage);
+        }
+      });
     });
   });
   </script>
