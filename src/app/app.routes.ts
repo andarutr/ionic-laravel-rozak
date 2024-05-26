@@ -24,4 +24,16 @@ export const routes: Routes = [
       return m.QuizPage
     })
   },
+  {
+    path: 'quiz/hasil',
+    loadComponent: () => import('./result/result.page').then( m => m.ResultPage)
+  },
+  {
+    path: 'user/profile',
+    loadComponent: () => import('./profile/profile.page').then( m => m.ProfilePage)
+  },
+  {
+    path: 'user/ganti-password',
+    loadComponent: () => import('./change-password/change-password.page').then( m => m.ChangePasswordPage)
+  },
 ];
