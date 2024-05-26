@@ -69,23 +69,36 @@
       let username = $("#username").val();
       let password = $("#password").val();
 
-      $.ajax({
-        type: "POST",
-        url: "http://localhost:8000/register",
-        data: {
-          nama_lengkap: nama_lengkap,
-          username: username,
-          password: password
-        },
-        success: function(){
-          if (confirm("Registrasi berhasil. Lanjutkan ke halaman login?")) {
-            window.location.href = "login";
+      if(nama_lengkap == ''){
+        alert('Nama lengkap harus diisi!');
+      }
+      
+      if(username == ''){
+        alert('Username harus diisi!');
+      }
+
+      if(password == ''){
+        alert('Password harus diisi!');
+      }
+      if(nama_lengkap != '' && username != '' && password != ''){
+        $.ajax({
+          type: "POST",
+          url: "http://localhost:8000/register",
+          data: {
+            nama_lengkap: nama_lengkap,
+            username: username,
+            password: password
+          },
+          success: function(){
+            if (confirm("Registrasi berhasil. Lanjutkan ke halaman login?")) {
+              window.location.href = "login";
+            }
+          },
+          error: function(xhr){
+            alert(xhr.responseText);
           }
-        },
-        error: function(xhr){
-          alert(xhr.responseText);
-        }
-      })
+        })
+      }
     });
 
     // Login
@@ -93,22 +106,33 @@
       let username = $("#username").val();
       let password = $("#password").val();
 
-      $.ajax({
-        type: "POST",
-        url: "http://localhost:8000/login",
-        data: {
-          username: username, password: password
-        },
-        success: function(){
-          alert("Berhasil login. Mohon tunggu...")
-          setTimeout(function(){
-            window.location.href = "home";
-          }, 2000);
-        },
-        error: function(xhr){
-          alert(xhr.responseText);
-        }
-      })
+      if(username == ''){
+        alert('Username harus diisi!');
+      }
+
+      if(password == ''){
+        alert('Password harus diisi!');
+      }
+      if(username != '' && password != ''){
+        $.ajax({
+          type: "POST",
+          url: "http://localhost:8000/login",
+          data: {
+            username: username, password: password
+          },
+          success: function(){
+            alert("Berhasil login. Mohon tunggu...")
+            setTimeout(function(){
+              window.location.href = "home";
+            }, 2000);
+          },
+          error: function(xhr){
+            let response = JSON.parse(xhr.responseText);
+            let errorMessage = response.msg;
+            alert(errorMessage);
+          }
+        })
+      }
     });
   });
   </script>
