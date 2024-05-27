@@ -50,6 +50,12 @@
     $(document).on("click", ".quizId", function(){
       let id = $(this).data("sesi");
 
+      if(id == 'empat' || id == 'lima' || id == 'enam' || id == 'tujuh' || id == 'delapan' || id == 'sembilan' || id == 'sepuluh'){
+        alert("Quiz belum tersedia!");
+        return ;
+      }
+
+      localStorage.setItem('quizId', id);
       window.location.href = "quiz/bagian/" + id
     });
 
@@ -214,6 +220,48 @@
         });
       }
     });
+
+    // Show Question
+    $.ajax({
+      type: "GET",
+      url: "http://localhost:8000/getQuestion",
+      dataType: "json",
+      data: {
+        quizId: localStorage.getItem('quizId')
+      },
+      success: function(res){
+        var html = '';
+
+        for (var i = 0; i < res.length; i++) {
+            var question = res[i];
+
+            if(question.picture){
+              html += `<img class="img-fluid" style="max-height: 250px" src="assets/img/${question.picture}">`;
+            }
+
+            html += `<p>${i + 1}. ${question.question}</p>`;
+            
+            // Tambahkan daftar pilihan jawaban
+            html += '<ul>';
+            html += `<li><input type="checkbox"> A. ${question.a}</li>`;
+            html += `<li><input type="checkbox"> B. ${question.b}</li>`;
+            html += `<li><input type="checkbox"> C. ${question.c}</li>`;
+            html += `<li><input type="checkbox"> D. ${question.d}</li>`;
+            html += '</ul>';
+        }
+
+        // Tambahkan tombol selesai
+        html += '<button class="btn btn-success mt-3 p-2 form-control" style="border-radius: 150px; background-color: #F99901; border: 2px solid black; color: black; font-weight: bold;" id="btnSubmit">Selesai</button>';
+
+        // Masukkan HTML ke dalam elemen dengan id "questionContainer"
+        $("#questionContainer").append(html);
+      },
+      error: function(xhr){
+        let response = JSON.parse(xhr.responseText);
+        let errorMessage = response.msg;
+        alert(errorMessage);
+      }
+    })
 
     // Logout
     $(document).on("click","#btnLogout", function(){
