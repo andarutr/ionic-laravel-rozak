@@ -23,3 +23,4 @@ Route::post('/logout', 'AuthController@logout');
 Route::post('/update-password', 'AuthController@update_password');
 Route::post('/update-profile', 'AuthController@update_profile');
 Route::get('/getName', 'AuthController@getName');
+Route::get('/getQuestion', 'QuestionController@getQuestion');
